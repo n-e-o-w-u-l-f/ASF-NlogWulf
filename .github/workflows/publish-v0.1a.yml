@@ -1,0 +1,31 @@
+name: Geprüften Alpha-Release veröffentlichen
+on:
+  push:
+    branches: [main]
+    paths:
+      - artifacts/v0.1a/**
+      - tools/publish_release.py
+      - .github/workflows/publish-v0.1a.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: asf-nlogwulf-v0.1a-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'n-e-o-w-u-l-f/ASF-NlogWulf' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Paket unverändert prüfen
+        run: python3 tools/publish_release.py --check-only
+      - name: Draft hochladen, herunterladen und veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/publish_release.py
